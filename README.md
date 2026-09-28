@@ -184,6 +184,8 @@ Missing optional values are shown without inventing additional information.
 
 ## Dataset
 
+**Dataset source:** [CISA KEV data repository — cisagov/kev-data](https://github.com/cisagov/kev-data).
+
 The project uses the local CISA KEV dataset located at:
 
 ```text
@@ -446,9 +448,9 @@ The project separates functional requirements from visual constraints through `P
 
 Application code in this project follows the licensing terms chosen by the project author.
 
-The vulnerability dataset is sourced from the **CISA Known Exploited Vulnerabilities (KEV) Catalog**.
+The vulnerability dataset is sourced from the **CISA Known Exploited Vulnerabilities (KEV) Catalog**, through the [cisagov/kev-data repository](https://github.com/cisagov/kev-data).
 
-Refer to the source dataset repository and included dataset license/documentation for its applicable terms.
+Refer to the [source dataset repository](https://github.com/cisagov/kev-data), included [dataset license](dataset/LICENSE), and [dataset documentation](dataset/README.md) for its applicable terms.
 
 ---
 
