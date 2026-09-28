@@ -32,18 +32,11 @@ The interface is intentionally designed as a **data-dense analyst workstation**,
 
 ## Screenshots
 
-> Place project screenshots inside `docs/screenshots/` and replace the paths below if necessary.
-
 ### Dashboard Overview
 
-<!-- Replace this placeholder with your final screenshot -->
-<!-- Example:
 ![KEV PatchOps Dashboard](docs/screenshots/dashboard-overview.png)
--->
 
-`[ Screenshot: Dashboard Overview ]`
-
-This view should show the main dashboard, including:
+The dashboard shows:
 
 - KPI summary
 - Operational Attention distribution
@@ -55,33 +48,17 @@ This view should show the main dashboard, including:
 
 ### Vulnerability Explorer
 
-<!-- Replace this placeholder with your final screenshot -->
-<!-- Example:
 ![Vulnerability Explorer](docs/screenshots/vulnerability-explorer.png)
--->
 
-`[ Screenshot: Vulnerability Explorer ]`
-
-This screenshot should highlight:
-
-- search
-- combined filters
-- vulnerability table
-- remediation ordering
-- pagination
+The explorer shows a CVE search result, filter controls, the vulnerability table, and pagination.
 
 ---
 
 ### Vulnerability Detail
 
-<!-- Replace this placeholder with your final screenshot -->
-<!-- Example:
 ![Vulnerability Detail](docs/screenshots/vulnerability-detail.png)
--->
 
-`[ Screenshot: Vulnerability Detail ]`
-
-This view should show the detail panel for a selected CVE, including the source-grounded remediation information.
+The detail panel shows the selected CVE, its metadata, required action, and source references.
 
 ---
 
@@ -286,8 +263,6 @@ web/
 └── dataset/
     └── known_exploited_vulnerabilities.json
 ```
-
-The `docs/screenshots/` directory is optional and can be created when documentation screenshots are ready.
 
 ---
 
