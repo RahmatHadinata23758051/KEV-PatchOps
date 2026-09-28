@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>KEV PatchOps — Vulnerability Remediation Command Center</title>
+  <meta name="description" content="Explore and prioritize the CISA Known Exploited Vulnerabilities catalog." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f5f5f2'/%3E%3Cpath d='M9 7v18M23 7L9 18m6-5 9 12' fill='none' stroke='%23315c73' stroke-width='3'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#explorer">Skip to vulnerabilities</a>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <h1>KEV <span>PatchOps</span></h1>
+        <p>Vulnerability Remediation Command Center</p>
+      </div>
+      <dl class="header-meta">
+        <div><dt>Dataset source</dt><dd>CISA KEV</dd></div>
+        <div><dt>Reference date</dt><dd><time datetime="2026-09-28" class="mono">28 Sep 2026</time></dd></div>
+      </dl>
+    </div>
+  </header>
+  <main id="main" aria-busy="true">
+    <div id="state-loading" class="app-state" role="status">Loading KEV dataset…</div>
+    <div id="state-error" class="app-state app-state--error" role="alert" hidden>
+      <h2>Dataset failed to load</h2>
+      <p id="error-message">Check that the local server is running and the dataset file is present.</p>
+      <button id="btn-retry" class="btn btn-secondary" type="button">Retry loading</button>
+    </div>
+    <div id="state-populated" hidden>
+      <section class="kpi-strip" aria-label="Full catalog summary">
+        <div class="kpi-item"><span class="kpi-label">Total KEV</span><span class="kpi-value mono" id="kpi-total">—</span><span class="kpi-context">Catalog entries</span></div>
+        <div class="kpi-item"><span class="kpi-label">Known ransomware</span><span class="kpi-value mono" id="kpi-ransomware">—</span><span class="kpi-context">Known campaign use</span></div>
+        <div class="kpi-item"><span class="kpi-label">Overdue</span><span class="kpi-value mono" id="kpi-overdue">—</span><span class="kpi-context">Due on / before reference date</span></div>
+        <div class="kpi-item"><span class="kpi-label">Due soon</span><span class="kpi-value mono" id="kpi-duesoon">—</span><span class="kpi-context">Within the next 14 days</span></div>
+        <div class="kpi-item"><span class="kpi-label">Forensic triage</span><span class="kpi-value mono" id="kpi-forensic">—</span><span class="kpi-context">Triage required</span></div>
+      </section>
+      <section class="overview-row" aria-label="Full catalog analytics">
+        <div class="attention-overview">
+          <h2 class="section-heading">Operational attention</h2>
+          <p class="section-note">Full catalog · application-derived</p>
+          <div id="attention-bars"></div>
+          <p class="classification-note">Remediation priority, not an official CISA severity rating.</p>
+        </div>
+        <div class="activity-overview">
+          <div class="section-topline"><h2 class="section-heading">KEV activity</h2><span class="section-note" id="activity-period"></span></div>
+          <p class="section-note">Monthly catalog additions · latest 12 months in dataset</p>
+          <div id="activity-chart" class="activity-chart"></div>
+        </div>
+      </section>
+      <section class="vendor-overview" aria-labelledby="vendors-heading">
+        <div><h2 id="vendors-heading" class="section-heading">Top vendor exposure</h2><p class="section-note">Top 8 · KEV record count</p></div>
+        <div class="vendor-bars" id="vendor-bars" role="list"></div>
+      </section>
+      <section id="explorer" class="explorer-section" aria-labelledby="explorer-heading" tabindex="-1">
+        <div class="explorer-heading"><h2 id="explorer-heading">Vulnerability explorer</h2><p>Remediation order <span aria-hidden="true">/</span> Attention, then due date</p></div>
+        <div class="explorer-toolbar" role="search" aria-label="Filter vulnerabilities">
+          <div class="toolbar-search-wrap">
+            <label for="search-input">Search catalog</label>
+            <div class="search-control">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+              <input id="search-input" type="search" placeholder="Search CVE, vendor, product, vulnerability, CWE…" autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+          <div class="filter-field"><label for="filter-attention">Attention</label><select id="filter-attention"><option value="">All levels</option><option value="URGENT">URGENT</option><option value="HIGH">HIGH</option><option value="PRIORITY">PRIORITY</option></select></div>
+          <div class="filter-field"><label for="filter-ransomware">Ransomware</label><select id="filter-ransomware"><option value="">All use</option><option value="Known">Known</option><option value="Unknown">Unknown</option></select></div>
+          <div class="filter-field"><label for="filter-forensic">Forensic triage</label><select id="filter-forensic"><option value="">All triage</option><option value="Yes">Required</option><option value="No">Not required</option></select></div>
+          <div class="filter-field filter-field--vendor"><label for="filter-vendor">Vendor</label><select id="filter-vendor"><option value="">All vendors</option></select></div>
+        </div>
+        <div class="results-rail"><span id="result-count" aria-live="polite" aria-atomic="true">— vulnerabilities</span><span class="results-context">Select a CVE to inspect</span><button id="btn-reset" class="link-btn" type="button" disabled>Reset filters</button></div>
+        <div class="table-container" role="region" aria-label="Vulnerability table" tabindex="0">
+          <table class="vuln-table" id="vuln-table">
+            <caption class="sr-only">Vulnerabilities sorted by operational attention and earliest due date. Select a row to inspect its details.</caption>
+            <colgroup><col class="col-cve"/><col class="col-vendor"/><col class="col-product"/><col class="col-vuln"/><col class="col-due"/><col class="col-ransom"/><col class="col-forensic"/><col class="col-attention"/></colgroup>
+            <thead><tr><th scope="col">CVE ID</th><th scope="col">Vendor</th><th scope="col">Product</th><th scope="col">Vulnerability / CWE</th><th scope="col">Due date</th><th scope="col">Ransomware</th><th scope="col">Forensic</th><th scope="col">Attention</th></tr></thead>
+            <tbody id="vuln-tbody"></tbody>
+          </table>
+          <div id="state-empty" class="table-empty" hidden role="status"><h3>No matching vulnerabilities</h3><p>No records match the current search or filters. <button class="link-btn" id="btn-reset-empty" type="button">Reset filters</button> to see the full catalog.</p></div>
+        </div>
+        <nav class="pagination-bar" id="pagination-bar" aria-label="Table pagination"><span class="pg-range mono" id="pg-range"></span><div class="pagination-controls"><button id="btn-prev" class="btn" type="button" aria-label="Previous page" disabled>Previous</button><span class="pg-info mono" id="pg-info" aria-live="polite">Page 1</span><button id="btn-next" class="btn" type="button" aria-label="Next page" disabled>Next</button></div></nav>
+      </section>
+      <footer class="app-footer"><span>CISA Known Exploited Vulnerabilities</span><span>Catalog-wide analytics · filtered table results</span></footer>
+    </div>
+  </main>
+  <aside id="detail-drawer" class="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-cve" aria-hidden="true" inert>
+    <div class="drawer-header"><span class="section-heading">Vulnerability inspection</span><button id="btn-close-drawer" class="btn-icon" type="button" aria-label="Close detail panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="drawer-body"><h2 class="drawer-cve mono" id="drawer-cve"></h2><div id="drawer-body"></div></div>
+  </aside>
+  <div id="drawer-backdrop" class="drawer-backdrop" hidden aria-hidden="true"></div>
+  <script src="app.js"></script>
+</body>
+</html>
