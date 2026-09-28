@@ -2,165 +2,482 @@
 
 **Vulnerability Remediation Command Center**
 
-A local, single-page security operations dashboard for exploring, filtering, and prioritizing vulnerabilities from the CISA Known Exploited Vulnerabilities (KEV) dataset.
+KEV PatchOps is a lightweight, local web application for exploring and prioritizing vulnerabilities from the **CISA Known Exploited Vulnerabilities (KEV)** catalog.
+
+The application is designed for Security Analysts, SOC Analysts, Vulnerability Management Teams, Security Engineers, and System Administrators who need a faster way to search, filter, review, and prioritize KEV records without working directly from the raw dataset.
+
+The project is built with **HTML5, CSS3, and vanilla JavaScript** and runs entirely in the browser without a backend or database.
 
 ---
 
-## Purpose
+## Project Overview
 
-Security teams deal with hundreds of vulnerability records that need rapid triage and remediation planning. The raw CISA KEV catalog, while authoritative, is not optimized for daily operational use.
+CISA KEV contains vulnerabilities that are known to have been exploited in the wild. The catalog is useful for remediation planning, but reviewing the raw dataset directly can be inefficient when analysts need to compare large numbers of records.
 
-KEV PatchOps transforms the KEV dataset into a fast, scannable remediation workspace with:
+KEV PatchOps turns the dataset into an operational dashboard with:
 
-- Immediate visibility into ransomware-associated vulnerabilities
-- Overdue and due-soon deadline tracking
-- Combined search and multi-filter exploration
-- Detail view with source-grounded remediation guidance
-- Application-derived Operational Attention classification
+- catalog-wide summary metrics
+- operational attention classification
+- KEV activity over time
+- top vendor exposure
+- full-text vulnerability search
+- multi-filter exploration
+- remediation-oriented sorting
+- vulnerability detail inspection
+- pagination for large result sets
 
-This is not a vulnerability scanner, asset inventory, or automated patch tool. It is a data exploration and remediation-support interface grounded entirely in the supplied CISA KEV dataset.
+The interface is intentionally designed as a **data-dense analyst workstation**, not a marketing dashboard.
 
 ---
 
-## Target Users
+## Screenshots
 
-| Role | Primary Use |
-|---|---|
-| Security Analyst | Prioritize and investigate CVEs |
-| SOC Analyst | Triage ransomware and overdue items |
-| Vulnerability Management Team | Track remediation deadlines |
-| Security Engineer | Review required actions per CVE |
-| System Administrator | Identify affected vendor/product exposure |
+> Place project screenshots inside `docs/screenshots/` and replace the paths below if necessary.
+
+### Dashboard Overview
+
+<!-- Replace this placeholder with your final screenshot -->
+<!-- Example:
+![KEV PatchOps Dashboard](docs/screenshots/dashboard-overview.png)
+-->
+
+`[ Screenshot: Dashboard Overview ]`
+
+This view should show the main dashboard, including:
+
+- KPI summary
+- Operational Attention distribution
+- KEV Activity chart
+- Top Vendor Exposure
+- Vulnerability Explorer
+
+---
+
+### Vulnerability Explorer
+
+<!-- Replace this placeholder with your final screenshot -->
+<!-- Example:
+![Vulnerability Explorer](docs/screenshots/vulnerability-explorer.png)
+-->
+
+`[ Screenshot: Vulnerability Explorer ]`
+
+This screenshot should highlight:
+
+- search
+- combined filters
+- vulnerability table
+- remediation ordering
+- pagination
+
+---
+
+### Vulnerability Detail
+
+<!-- Replace this placeholder with your final screenshot -->
+<!-- Example:
+![Vulnerability Detail](docs/screenshots/vulnerability-detail.png)
+-->
+
+`[ Screenshot: Vulnerability Detail ]`
+
+This view should show the detail panel for a selected CVE, including the source-grounded remediation information.
+
+---
+
+## Core Features
+
+### Catalog Summary
+
+The dashboard calculates summary values directly from the loaded KEV dataset:
+
+- **Total KEV**
+- **Known Ransomware**
+- **Overdue**
+- **Due Soon**
+- **Forensic Triage Required**
+
+No dataset-derived metric is hard-coded.
+
+---
+
+### Operational Attention Level
+
+KEV PatchOps uses an application-specific classification called **Operational Attention Level**.
+
+This is **not an official CISA severity or risk score**.
+
+The project uses a fixed reference date for the capstone demonstration:
+
+```text
+2026-09-28
+```
+
+Classification rules:
+
+```text
+URGENT
+knownRansomwareCampaignUse = "Known"
+
+HIGH
+knownRansomwareCampaignUse != "Known"
+AND dueDate <= 2026-09-28
+
+PRIORITY
+knownRansomwareCampaignUse != "Known"
+AND dueDate > 2026-09-28
+```
+
+Precedence:
+
+```text
+URGENT > HIGH > PRIORITY
+```
+
+---
+
+### KEV Activity
+
+The application aggregates `dateAdded` values from the dataset and displays recent catalog additions as a timeline.
+
+The chart is generated from the real dataset and does not use fabricated trend data.
+
+---
+
+### Vendor Exposure
+
+The dashboard calculates vendors with the highest number of KEV entries and displays a compact comparison of the top vendors.
+
+---
+
+### Vulnerability Explorer
+
+The explorer supports full-text search across:
+
+- CVE ID
+- vendor
+- product
+- vulnerability name
+- CWE
+
+Available filters:
+
+- Operational Attention Level
+- Ransomware Use
+- Forensic Triage
+- Vendor
+
+Search and filters can be combined.
+
+---
+
+### Remediation Order
+
+The default record order is:
+
+1. URGENT
+2. HIGH
+3. PRIORITY
+
+Within the same attention level, vulnerabilities are ordered by nearest due date first.
+
+---
+
+### Vulnerability Detail
+
+Selecting a vulnerability opens a focused detail view containing available source fields such as:
+
+- CVE ID
+- vendor
+- product
+- vulnerability name
+- short description
+- CWE
+- date added
+- due date
+- known ransomware campaign use
+- forensic triage
+- Operational Attention Level
+- required action
+- notes / references
+
+Missing optional values are shown without inventing additional information.
 
 ---
 
 ## Dataset
 
-**Source:** CISA Known Exploited Vulnerabilities Catalog  
-**File:** `./dataset/known_exploited_vulnerabilities.json` (relative to `langflow/web/index.html`)  
-**Catalog version:** 2026.09.27  
-**Record count:** 1,728 vulnerabilities
+The project uses the local CISA KEV dataset located at:
 
-The dataset file must not be modified. All computed values (KPIs, Operational Attention Level, vendor counts, etc.) are derived at runtime from the source JSON.
+```text
+dataset/known_exploited_vulnerabilities.json
+```
+
+The application reads the full dataset directly in the browser.
+
+The dataset directory is treated as source data and should not be modified by the application.
+
+### Main Dataset Fields
+
+Fields used by the application include:
+
+```text
+cveID
+vendorProject
+product
+vulnerabilityName
+dateAdded
+shortDescription
+requiredAction
+dueDate
+knownRansomwareCampaignUse
+forensicTriage
+notes
+cwes
+```
+
+KEV PatchOps does not invent external security data such as:
+
+- CVSS scores
+- exploit maturity
+- threat actor names
+- affected versions
+- patch versions
+- organization asset exposure
+
+unless that information is already present in the supplied source data.
 
 ---
 
-## Reference Date
+## Technology Stack
 
-```
-2026-09-28
+```text
+HTML5
+CSS3
+Vanilla JavaScript
+CISA KEV JSON Dataset
 ```
 
-All due-date calculations (Overdue, Due Soon) use this fixed reference date.
+The project intentionally avoids:
+
+- frontend frameworks
+- backend services
+- databases
+- external charting libraries
+- unnecessary build tooling
 
 ---
 
-## Operational Attention Level
+## Project Structure
 
-KEV PatchOps applies an application-specific classification called **Operational Attention Level**. This is **not** an official CISA severity rating, score, or risk assessment.
-
-### URGENT
-
-```
-knownRansomwareCampaignUse = "Known"
-```
-
-### HIGH
-
-```
-knownRansomwareCampaignUse ≠ "Known"
-AND dueDate ≤ 2026-09-28
-```
-
-### PRIORITY
-
-```
-knownRansomwareCampaignUse ≠ "Known"
-AND dueDate > 2026-09-28
-```
-
-**Precedence:** URGENT > HIGH > PRIORITY
-
-The vulnerability table defaults to this remediation order, with nearest due date first within each level.
-
----
-
-## KPI Definitions
-
-| KPI | Definition |
-|---|---|
-| Total KEV | Count of all records in the dataset |
-| Known Ransomware | `knownRansomwareCampaignUse = "Known"` |
-| Overdue | `dueDate ≤ 2026-09-28` |
-| Due Soon | `dueDate > 2026-09-28` AND `dueDate ≤ 2026-10-12` (14-day window) |
-| Forensic Triage Required | `forensicTriage = "Yes"` |
-
-No KPI values are hard-coded.
-
----
-
-## File Structure
-
-```
-langflow/web/                  ← application root (serve from here)
-├── index.html                 ← single-page application shell
-├── styles.css                 ← light workstation design and layout
-├── app.js                     ← existing data logic, charts, and rendering
+```text
+web/
+├── index.html
+├── styles.css
+├── app.js
 ├── README.md
+├── PRD.md
+├── DESIGN.md
+├── docs/
+│   └── screenshots/
+│       ├── dashboard-overview.png
+│       ├── vulnerability-explorer.png
+│       └── vulnerability-detail.png
 └── dataset/
-    └── known_exploited_vulnerabilities.json   ← unchanged source data
+    └── known_exploited_vulnerabilities.json
 ```
+
+The `docs/screenshots/` directory is optional and can be created when documentation screenshots are ready.
 
 ---
 
-## Local Run Instructions
+## Running Locally
 
-### Prerequisites
+Open a terminal in the project directory.
 
-- Python 3 installed (for the built-in HTTP server)
-- No internet connection required. IBM Plex Sans / Mono are used when installed locally, with system font fallbacks. Icons are inline SVG.
+```powershell
+cd C:\Users\user\Nata\IBM2026\langflow\web
+```
 
-### Start the server
+Start a local HTTP server:
 
-From `langflow/web` (where `index.html` lives):
-
-```bash
+```powershell
 python -m http.server 8080
 ```
 
-### Open in browser
+Then open:
 
-```
+```text
 http://localhost:8080
 ```
 
-> **Important:** The application fetches the dataset via `fetch()`. It must be served over HTTP — opening `index.html` directly as a `file://` URL will fail due to browser CORS restrictions on local file requests.
+> The dataset is loaded through `fetch()`, so opening `index.html` directly with `file://` is not recommended.
 
 ---
 
-## Features
+## Design Direction
 
-- **Application header** with product name, tagline, dataset source, and reference date
-- **KPI strip** with dynamically computed totals
-- **Operational Attention overview** with a single proportional distribution bar, counts, and percentages
-- **KEV activity** with an SVG line chart of monthly `dateAdded` counts for the latest 12 calendar months in the dataset; missing months count as zero, and the last month may be partial
-- **Vendor exposure** showing top 8 vendors by record count
-- **Search** across CVE ID, vendor, product, vulnerability name, and CWE
-- **Filters** for Attention Level, Ransomware Use, Forensic Triage, and Vendor — combinable
-- **Result count** updates as filters change
-- **Vulnerability table** with pagination (50 rows per page), default remediation sort
-- **Detail drawer** with all available source fields; missing optional fields shown as "Not provided"
-- **Loading / error / empty states** for all conditions
-- **Keyboard accessible** — table rows navigable with Enter/Space, Escape closes drawer, focus returns to the selected row, and keyboard focus stays within an open drawer
+The final interface follows a restrained, operational visual direction.
+
+Main principles:
+
+- light neutral canvas
+- strong information hierarchy
+- compact data density
+- table-first interaction
+- restrained semantic colors
+- minimal radius and shadow
+- typography-led structure
+- no decorative cyberpunk styling
+- no glassmorphism
+- no unnecessary card grids
+- no fake metrics
+- no generic AI-dashboard visual patterns
+
+Typography is split between:
+
+- **IBM Plex Sans** for interface and content
+- **IBM Plex Mono** for CVE IDs, dates, technical values, and compact metadata
+
+Status colors are used to communicate meaning, not decoration.
 
 ---
 
-## Technology
+## Application States
 
-- HTML5
-- CSS3 (custom properties for design tokens)
-- Vanilla JavaScript (ES2020, no frameworks)
-- IBM Plex Sans / IBM Plex Mono (local fonts with system fallbacks)
-- Inline outline SVG icons and data-derived charts
+The interface supports:
 
-No build step required.
+- loading
+- populated
+- no results
+- dataset error
+- edge cases
+
+Examples of handled edge cases include:
+
+- long vulnerability names
+- long product names
+- missing optional fields
+- large result counts
+- combined filters
+- long required-action content
+
+---
+
+## Accessibility
+
+The interface is designed around practical accessibility requirements, including:
+
+- semantic HTML
+- keyboard-accessible controls
+- visible focus states
+- sufficient contrast
+- native form controls where possible
+- status labels that do not rely on color alone
+- accessible names for icon-only actions
+- reduced-motion support where applicable
+
+---
+
+## Validation Checklist
+
+Before final submission, verify:
+
+```text
+[ ] Full KEV dataset loads correctly
+[ ] KPI values are computed from the dataset
+[ ] Operational Attention classification is correct
+[ ] Search works
+[ ] Combined filters work
+[ ] Result counts are accurate
+[ ] Sorting follows remediation priority
+[ ] Pagination works
+[ ] Vulnerability detail opens correctly
+[ ] Loading state behaves correctly
+[ ] No-results state behaves correctly
+[ ] Dataset error state behaves correctly
+[ ] No contradictory loading/error/populated states
+[ ] No JavaScript console errors in the main flow
+[ ] Charts use real dataset values
+[ ] Layout remains usable on desktop and tablet
+```
+
+---
+
+## Project Documentation
+
+Two supporting documents are included in the project root:
+
+### `PRD.md`
+
+Defines:
+
+- product goal
+- problem statement
+- target users
+- functional requirements
+- business rules
+- dataset usage
+- technical scope
+- acceptance criteria
+
+### `DESIGN.md`
+
+Defines:
+
+- visual direction
+- anti-AI-slop rules
+- typography
+- color usage
+- iconography
+- spacing
+- table behavior
+- accessibility
+- interaction states
+- responsive behavior
+
+---
+
+## Scope
+
+KEV PatchOps is intended as a vulnerability exploration and remediation-support interface.
+
+It is not:
+
+- an official CISA risk scoring system
+- a vulnerability scanner
+- an exploit detection platform
+- an asset inventory
+- an automated patch deployment tool
+- a replacement for security analyst judgment
+
+---
+
+## Capstone Context
+
+KEV PatchOps was developed as an IBM Bob capstone project using a layered prompting workflow:
+
+```text
+Layer 1 — Role & Context
+Layer 2 — Task & Requirements
+Layer 3 — Constraints & Output
+```
+
+The project separates functional requirements from visual constraints through `PRD.md` and `DESIGN.md`, allowing targeted refinement without rewriting the entire project specification.
+
+---
+
+## License and Data Attribution
+
+Application code in this project follows the licensing terms chosen by the project author.
+
+The vulnerability dataset is sourced from the **CISA Known Exploited Vulnerabilities (KEV) Catalog**.
+
+Refer to the source dataset repository and included dataset license/documentation for its applicable terms.
+
+---
+
+## Author
+
+**Rahmat Hadinata**  
+Politeknik Negeri Lampung
